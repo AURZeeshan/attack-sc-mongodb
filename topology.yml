@@ -6,7 +6,7 @@ hosts:
       image: ubuntu-noble-x86_64
       mgmt_user: ubuntu
       mgmt_protocol: ssh
-    flavor: standard.small  # Linux is lightweight
+    flavor: standard.small
 
   - name: windows-host
     base_box:
@@ -14,6 +14,8 @@ hosts:
       mgmt_user: windows
       mgmt_protocol: winrm
     flavor: standard.medium
+    # IMPORTANT for WinRM stability
+    user_access: true
 
 routers:
   - name: router
@@ -30,19 +32,24 @@ networks:
 
   - name: client-switch
     cidr: 192.168.30.0/24
+    accessible_by_user: true
 
 net_mappings:
   - host: server
     network: server-switch
     ip: 192.168.20.5
+    gateway: 192.168.20.1
+
   - host: windows-host
     network: client-switch
     ip: 192.168.30.5
+    gateway: 192.168.30.1
 
 router_mappings:
   - router: router
     network: server-switch
     ip: 192.168.20.1
+
   - router: router
     network: client-switch
     ip: 192.168.30.1
