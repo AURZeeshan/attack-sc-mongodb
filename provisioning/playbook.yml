@@ -103,7 +103,8 @@
     - name: Wait for WinRM to come back online
       wait_for_connection:
         timeout: 1800
-        delay: 30
+        delay: 60
+        sleep: 10
       when: rename_result.reboot_required
 
 
