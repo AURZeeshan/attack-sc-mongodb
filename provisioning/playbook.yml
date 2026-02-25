@@ -55,9 +55,9 @@
         data: 0
         state: present
 
-    - name: Enable RDP firewall rule
-      ansible.windows.win_shell: |
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    # - name: Enable RDP firewall rule
+    #   ansible.windows.win_shell: |
+    #     Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
     - name: Add user to Remote Desktop Users group
       ansible.windows.win_group_membership:
