@@ -8,13 +8,6 @@ hosts:
       mgmt_protocol: ssh
     flavor: standard.small
 
-  - name: windows-host
-    base_box:
-      image: Windows-Server-2022
-      mgmt_user: windows
-      mgmt_protocol: winrm
-    flavor: standard.medium
-
   - name: db-server
     base_box:
       image: ubuntu-noble-x86_64
@@ -54,10 +47,6 @@ net_mappings:
   - host: server
     network: server-switch
     ip: 192.168.20.5
-
-  - host: windows-host
-    network: client-switch
-    ip: 192.168.30.5
 
   - host: db-server
     network: db-switch
