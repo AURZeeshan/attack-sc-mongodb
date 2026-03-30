@@ -24,7 +24,7 @@ hosts:
 
   - name: kali               # NEW: attacker machine
     base_box:
-      image: kali-linux-x86_64
+      image: kali
       mgmt_user: kali
       mgmt_protocol: ssh
     flavor: standard.medium
@@ -66,6 +66,7 @@ net_mappings:
   - host: kali               # NEW — kali sits on client-switch so it can reach all via router
     network: client-switch
     ip: 192.168.30.10
+    accessible_by_user: true
 
 router_mappings:
   - router: router
