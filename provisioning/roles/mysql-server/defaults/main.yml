@@ -1,0 +1,5 @@
+mysql_root_password: "R00tP@ss!"
+mysql_user: dbuser
+mysql_user_password: "UserP@ss!"
+mysql_db: company
+mysql_flag: "MySQL_Flag_Here"

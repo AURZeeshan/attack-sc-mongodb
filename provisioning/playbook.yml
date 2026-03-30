@@ -104,3 +104,81 @@
         regexp: '^\d+\.\d+\.\d+\.\d+\s+{{ stack_prefix }}'
         state: absent
       when: stack_prefix is defined
+
+# ==============================
+# DB Server Setup (MySQL + MongoDB)
+# ==============================
+
+- name: set up db server
+  hosts: db-server
+  become: yes
+  roles:
+    - role: mysql-server
+      mysql_root_password: "{{ mysql_root_password }}"
+      mysql_user: dbuser
+      mysql_user_password: "{{ mysql_user_password }}"
+      mysql_db: company
+      mysql_flag: "{{ mysql_flag }}"
+
+    - role: mongodb-server
+      mongo_user: mongoadmin
+      mongo_password: "{{ mongo_password }}"
+      mongo_db: records
+      mongo_flag: "{{ mongo_flag }}"
+
+
+# ==============================
+# Kali Attacker Setup
+# ==============================
+
+- name: set up kali attacker
+  hosts: kali
+  become: yes
+  roles:
+    - role: kali-attacker
+
+
+# ==============================
+# Disable QXL on db-server and kali
+# ==============================
+
+- name: disable qxl on new Linux nodes
+  hosts:
+    - db-server
+    - kali
+  gather_facts: yes
+  become: yes
+  tasks:
+    - include_role:
+        name: disable-qxl
+      when: ansible_os_family == 'Debian'
+
+
+# ==============================
+# Hostname cleanup for new nodes
+# ==============================
+
+- name: remove stack name prefix from new Linux nodes
+  hosts:
+    - db-server
+    - kali
+  gather_facts: yes
+  become: yes
+  tasks:
+    - name: Set new hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Make cloud-init preserve hostname changes
+      lineinfile:
+        path: /etc/cloud/cloud.cfg
+        regexp: '^preserve_hostname:'
+        line: 'preserve_hostname: true'
+        create: yes
+
+    - name: Remove stack name prefix from /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^\d+\.\d+\.\d+\.\d+\s+{{ stack_prefix }}'
+        state: absent
+      when: stack_prefix is defined

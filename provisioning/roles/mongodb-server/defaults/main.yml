@@ -1,0 +1,4 @@
+mongo_user: mongoadmin
+mongo_password: "MongoP@ss!"
+mongo_db: records
+mongo_flag: "MongoDB_Flag_Here"

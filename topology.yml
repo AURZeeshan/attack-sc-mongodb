@@ -1,4 +1,4 @@
-name: library-demo-for-windows
+name: MongoDB-Mysql-Exercise
 
 hosts:
   - name: server
@@ -13,6 +13,20 @@ hosts:
       image: Windows-Server-2022
       mgmt_user: windows
       mgmt_protocol: winrm
+    flavor: standard.medium
+
+  - name: db-server          # NEW: hosts MySQL + MongoDB
+    base_box:
+      image: ubuntu-noble-x86_64
+      mgmt_user: ubuntu
+      mgmt_protocol: ssh
+    flavor: standard.medium  # medium — two DB services
+
+  - name: kali               # NEW: attacker machine
+    base_box:
+      image: kali-linux-x86_64
+      mgmt_user: kali
+      mgmt_protocol: ssh
     flavor: standard.medium
 
 routers:
@@ -32,6 +46,10 @@ networks:
     cidr: 192.168.30.0/24
     accessible_by_user: true
 
+  - name: db-switch          # NEW: isolated DB network
+    cidr: 192.168.40.0/24
+    accessible_by_user: false
+
 net_mappings:
   - host: server
     network: server-switch
@@ -41,6 +59,14 @@ net_mappings:
     network: client-switch
     ip: 192.168.30.5
 
+  - host: db-server          # NEW
+    network: db-switch
+    ip: 192.168.40.5
+
+  - host: kali               # NEW — kali sits on client-switch so it can reach all via router
+    network: client-switch
+    ip: 192.168.30.10
+
 router_mappings:
   - router: router
     network: server-switch
@@ -49,5 +75,9 @@ router_mappings:
   - router: router
     network: client-switch
     ip: 192.168.30.1
+
+  - router: router           # NEW
+    network: db-switch
+    ip: 192.168.40.1
 
 groups: []

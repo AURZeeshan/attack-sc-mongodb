@@ -9,3 +9,25 @@ alice_flag:
 
 root_flag:
     type: text
+    
+mysql_root_password: "R00tP@ss!"
+mysql_user_password: "UserP@ss!"
+mysql_flag: "FLAG{mysql_secret_data_exposed}"
+mongo_password: "MongoP@ss!"
+mongo_flag: "FLAG{mongodb_no_auth_misconfiguration}"
+```
+
+> **For production exercises** move passwords into an Ansible Vault file (`ansible-vault encrypt_string`) so they aren't in plaintext.
+
+---
+
+## How the Exercise Flow Works
+```
+Kali (192.168.30.10)
+        │
+        │  nmap scan → discovers ports 3306 + 27017 on db-server
+        │
+        ▼
+DB Server (192.168.40.5)
+  ├── MySQL :3306   → brute-force with Hydra → login → SELECT flag from employees table
+  └── MongoDB :27017 → no auth → mongosh connect → db.flags.find() → read flag

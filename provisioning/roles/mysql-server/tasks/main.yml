@@ -1,0 +1,65 @@
+---
+- name: Install MySQL server
+  apt:
+    pkg:
+      - mysql-server
+      - python3-pymysql   # needed for Ansible mysql modules
+    update_cache: yes
+
+- name: Ensure MySQL is running
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Set MySQL root password
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    host_all: yes
+    state: present
+
+- name: Create application database
+  mysql_db:
+    name: "{{ mysql_db }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Create MySQL user with weak password (intentionally vulnerable)
+  mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_user_password }}"
+    priv: "{{ mysql_db }}.*:ALL"
+    host: "%"             # allows remote login — this is the vulnerability
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Allow MySQL to listen on all interfaces (makes it remotely accessible)
+  lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^bind-address'
+    line: 'bind-address = 0.0.0.0'
+  notify: restart mysql
+
+- name: Create employees table and insert flag as a record
+  mysql_query:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_db: "{{ mysql_db }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS employees (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100),
+        secret VARCHAR(255)
+      );
+      INSERT INTO employees (name, secret)
+        SELECT 'admin', '{{ mysql_flag }}'
+        WHERE NOT EXISTS (SELECT 1 FROM employees WHERE name='admin');
+
+- name: Add db-server hostname to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: '192.168.40.5 db-server'
