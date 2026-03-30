@@ -35,31 +35,31 @@
 # (NO reboot here)
 # ==============================
 
-- name: set up windows client
-  hosts: windows-host
-  gather_facts: yes
-  tasks:
+# - name: set up windows client
+#   hosts: windows-host
+#   gather_facts: yes
+#   tasks:
 
-    - name: Create local Windows user
-      ansible.windows.win_user:
-        name: user
-        password: Password123
-        state: present
-        groups:
-          - Users
+#     - name: Create local Windows user
+#       ansible.windows.win_user:
+#         name: user
+#         password: Password123
+#         state: present
+#         groups:
+#           - Users
 
-    - name: Enable Remote Desktop
-      ansible.windows.win_regedit:
-        path: HKLM:\System\CurrentControlSet\Control\Terminal Server
-        name: fDenyTSConnections
-        data: 0
-        state: present
+#     - name: Enable Remote Desktop
+#       ansible.windows.win_regedit:
+#         path: HKLM:\System\CurrentControlSet\Control\Terminal Server
+#         name: fDenyTSConnections
+#         data: 0
+#         state: present
         
-    - name: Add user to Remote Desktop Users group
-      ansible.windows.win_group_membership:
-        name: "Remote Desktop Users"
-        members: user
-        state: present
+#     - name: Add user to Remote Desktop Users group
+#       ansible.windows.win_group_membership:
+#         name: "Remote Desktop Users"
+#         members: user
+#         state: present
 
 
 # ==============================
