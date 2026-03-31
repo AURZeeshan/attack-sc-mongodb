@@ -3,6 +3,30 @@
   apt:
     update_cache: yes
 
+- name: Install prerequisites for MongoDB repo
+  apt:
+    name:
+      - gnupg
+      - curl
+    state: present
+
+- name: Add MongoDB GPG key
+  shell: |
+    curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+    gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-server-7.0.gpg
+  args:
+    creates: /etc/apt/trusted.gpg.d/mongodb-server-7.0.gpg
+
+- name: Add MongoDB apt repository (Debian bookworm — compatible with Kali)
+  apt_repository:
+    repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main"
+    state: present
+    filename: mongodb-org-7.0
+
+- name: Update apt cache after adding MongoDB repo
+  apt:
+    update_cache: yes
+
 - name: Install attack tools
   apt:
     pkg:
@@ -17,19 +41,19 @@
       - wget
       - netcat-openbsd
       - john
-    update_cache: yes
-
-- name: Download rockyou wordlist
-  get_url:
-    url: https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
-    dest: /usr/share/wordlists/rockyou.txt
-    mode: '0644'
+    state: present
 
 - name: Ensure wordlists directory exists
   file:
     path: /usr/share/wordlists
     state: directory
     mode: '0755'
+
+- name: Download rockyou wordlist
+  get_url:
+    url: https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+    dest: /usr/share/wordlists/rockyou.txt
+    mode: '0644'
 
 - name: Add host aliases for easy access
   blockinfile:
