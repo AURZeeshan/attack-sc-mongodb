@@ -3,7 +3,7 @@
   apt:
     pkg:
       - mysql-server
-      - python3-pymysql   # needed for Ansible mysql modules
+      - python3-pymysql
     update_cache: yes
 
 - name: Ensure MySQL is running
@@ -13,7 +13,7 @@
     enabled: yes
 
 - name: Set MySQL root password
-  mysql_user:
+  community.mysql.mysql_user:
     name: root
     password: "{{ mysql_root_password }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
@@ -21,31 +21,39 @@
     state: present
 
 - name: Create application database
-  mysql_db:
+  community.mysql.mysql_db:
     name: "{{ mysql_db }}"
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     login_user: root
     login_password: "{{ mysql_root_password }}"
 
 - name: Create MySQL user with weak password (intentionally vulnerable)
-  mysql_user:
+  community.mysql.mysql_user:
     name: "{{ mysql_user }}"
     password: "{{ mysql_user_password }}"
     priv: "{{ mysql_db }}.*:ALL"
-    host: "%"             # allows remote login — this is the vulnerability
+    host: "%"
     state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     login_user: root
     login_password: "{{ mysql_root_password }}"
 
-- name: Allow MySQL to listen on all interfaces (makes it remotely accessible)
+- name: Allow MySQL to listen on all interfaces
   lineinfile:
     path: /etc/mysql/mysql.conf.d/mysqld.cnf
     regexp: '^bind-address'
     line: 'bind-address = 0.0.0.0'
   notify: restart mysql
 
-- name: Create employees table and insert flag as a record
-  mysql_query:
+- name: Restart MySQL now so bind-address takes effect before queries
+  service:
+    name: mysql
+    state: restarted
+
+- name: Create employees table
+  community.mysql.mysql_query:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
     login_user: root
     login_password: "{{ mysql_root_password }}"
     login_db: "{{ mysql_db }}"
@@ -54,10 +62,22 @@
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100),
         secret VARCHAR(255)
-      );
+      )
+
+- name: Insert flag into employees table
+  community.mysql.mysql_query:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_db: "{{ mysql_db }}"
+    query: >
       INSERT INTO employees (name, secret)
-        SELECT 'admin', '{{ mysql_flag }}'
-        WHERE NOT EXISTS (SELECT 1 FROM employees WHERE name='admin');
+      SELECT %s, %s
+      WHERE NOT EXISTS (SELECT 1 FROM employees WHERE name=%s)
+    positional_args:
+      - "admin"
+      - "{{ mysql_flag }}"
+      - "admin"
 
 - name: Add db-server hostname to /etc/hosts
   lineinfile:
