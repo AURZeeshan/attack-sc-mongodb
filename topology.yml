@@ -1,4 +1,4 @@
-name: mongodb-mysql-exercise
+name: attack-sc-mongodb
 
 hosts:
   - name: server
