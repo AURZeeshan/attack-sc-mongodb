@@ -23,4 +23,4 @@ mongo_password:
     type: text
 
 mongo_flag:
-    type: text
+    type: mongodb-flag

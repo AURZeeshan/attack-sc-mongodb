@@ -51,7 +51,7 @@
         if (dbObj.flags.countDocuments({name: 'admin'}) === 0) {
           dbObj.flags.insertOne({
             name: 'admin',
-            secret: '{{ mongo_flag }}',
+            secret: '{{ mongo_flag | to_json  }}',
             note: 'confidential'
           });
         }
