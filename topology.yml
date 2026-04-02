@@ -7,6 +7,16 @@ hosts:
       mgmt_user: ubuntu
       mgmt_protocol: ssh
     flavor: standard.small
+    groups:
+      - monitor-icmp
+      - monitor-os
+    monitoring_targets:
+      - interface: eth0
+        port: 80
+      - interface: eth0
+        port: 443
+      - interface: eth0
+        port: 22
 
   - name: db-server
     base_box:
@@ -14,13 +24,24 @@ hosts:
       mgmt_user: ubuntu
       mgmt_protocol: ssh
     flavor: standard.medium
+    groups:
+      - monitor-icmp
+      - monitor-os
+    monitoring_targets:
+      - interface: eth0
+        port: 27017   # MongoDB default port
+      - interface: eth0
+        port: 22
 
   - name: kali
     base_box:
-      image: debian-12-x86_64   # switched from kali — confirmed working
+      image: debian-12-x86_64
       mgmt_user: debian
       mgmt_protocol: ssh
     flavor: standard.medium
+    groups:
+      - monitor-icmp
+      - monitor-os
 
 routers:
   - name: router
@@ -29,6 +50,9 @@ routers:
       mgmt_user: debian
       mgmt_protocol: ssh
     flavor: standard.small
+    groups:
+      - monitor-icmp
+      - monitor-os
 
 networks:
   - name: server-switch
@@ -69,4 +93,6 @@ router_mappings:
     network: db-switch
     ip: 192.168.40.1
 
-groups: []
+groups:
+  - name: monitor-icmp
+  - name: monitor-os
