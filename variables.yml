@@ -1,5 +1,3 @@
-# For more details about APG Variables see https://docs.platform.cyberrange.cz/user-guide-advanced/sandboxes/apg-variables/
-
 telnet_port:
     type: port
     min: 1500
@@ -23,4 +21,4 @@ mongo_password:
     type: text
 
 mongo_flag:
-    type: mongodb-flag
+    type: text    # ← was mongodb-flag, not a valid type
