@@ -83,8 +83,3 @@ groups:
       - db-server
       - kali
       - router
-
-# monitoring_targets removed — TCP port monitoring triggers a bug
-# in the prometheus role at line 35 that cannot be fixed from topology.yml.
-# ICMP liveness and OS metrics (CPU/RAM/disk) still work via monitor-icmp
-# and monitor-os groups above.
