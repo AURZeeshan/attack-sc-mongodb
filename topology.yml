@@ -69,17 +69,18 @@ router_mappings:
     network: db-switch
     ip: 192.168.40.1
 
-groups:
-  - name: monitor-icmp
-    nodes:
-      - server
-      - db-server
-      - kali
-      - router
+groups: []    # ← monitoring disabled, no man node spawned
+# groups:
+#   - name: monitor-icmp
+#     nodes:
+#       - server
+#       - db-server
+#       - kali
+#       - router
 
-  - name: monitor-os
-    nodes:
-      - server
-      - db-server
-      - kali
-      - router
+#   - name: monitor-os
+#     nodes:
+#       - server
+#       - db-server
+#       - kali
+#       - router
